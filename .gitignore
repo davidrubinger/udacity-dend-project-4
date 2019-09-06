@@ -109,3 +109,4 @@ log-data/*
 song_data/*
 songs_table.parquet/*
 artists_table.parquet/*
+*.code-workspace
