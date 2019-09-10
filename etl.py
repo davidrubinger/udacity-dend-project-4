@@ -78,7 +78,7 @@ def process_song_data(spark, input_data, output_data):
     
     # write songs table to parquet files partitioned by year and artist
     songs_table.write.parquet(
-        "songs_table.parquet",
+        output_data + "songs_table.parquet",
         mode="overwrite",
         partitionBy=["year", "artist_id"]
     )
@@ -96,7 +96,9 @@ def process_song_data(spark, input_data, output_data):
     )
     
     # write artists table to parquet files
-    artists_table.write.parquet("artists_table.parquet", mode="overwrite")
+    artists_table.write.parquet(
+        output_data + "artists_table.parquet", mode="overwrite"
+    )
 
 
 def process_log_data(spark, input_data, output_data):
@@ -148,7 +150,9 @@ def process_log_data(spark, input_data, output_data):
     )
 
     # write users table to parquet files
-    users_table.write.parquet("users_table.parquet", mode="overwrite")
+    users_table.write.parquet(
+        output_data + "users_table.parquet", mode="overwrite"
+    )
 
     # create datetime column from original timestamp column
     get_datetime = udf(
@@ -172,14 +176,16 @@ def process_log_data(spark, input_data, output_data):
 
     # write time table to parquet files partitioned by year and month
     time_table.write.parquet(
-        "time_table.parquet", mode="overwrite", partitionBy=["year", "month"]
+        output_data + "time_table.parquet",
+        mode="overwrite",
+        partitionBy=["year", "month"]
     )
 
     # read in song data to use for songplays table
-    song_df = spark.read.parquet("songs_table.parquet")
+    song_df = spark.read.parquet(output_data + "songs_table.parquet")
 
     # extract columns from joined song and log datasets to create songplays table 
-    artists_table = spark.read.parquet("artists_table.parquet")
+    artists_table = spark.read.parquet(output_data + "artists_table.parquet")
     songs = (
         song_df
         .join(artists_table, "artist_id", "full")
@@ -208,7 +214,7 @@ def process_log_data(spark, input_data, output_data):
 
     # write songplays table to parquet files partitioned by year and month
     songplays_table.write.parquet(
-        "songplays_table.parquet",
+        output_data + "songplays_table.parquet",
         mode="overwrite",
         partitionBy=["year", "month"]
     )
@@ -220,7 +226,7 @@ def main():
     # S3 bucket name to create and output tables to
     output_bucket = "davidrubinger"
     input_data = "s3a://udacity-dend/"
-    output_data = ""
+    output_data = "s3a://" + output_bucket + "/"
     
     create_bucket(output_bucket, region="us-west-2", acl="public-read")
     process_song_data(spark, input_data, output_data)
