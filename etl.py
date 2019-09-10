@@ -6,6 +6,9 @@ from pyspark.sql.functions import (udf, col, year, month, dayofmonth, hour,
     weekofyear, date_format, dayofweek, max, monotonically_increasing_id)
 from pyspark.sql.types import (
     StructType, StructField, StringType, DoubleType, IntegerType, TimestampType)
+import logging
+import boto3
+from botocore.exceptions import ClientError
 
 
 config = configparser.ConfigParser()
@@ -21,6 +24,35 @@ def create_spark_session():
         .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:2.7.0") \
         .getOrCreate()
     return spark
+
+
+def create_bucket(bucket_name, region=None, acl="private"):
+    """Create an S3 bucket in a specified region
+    
+    :param bucket_name: Bucket to create
+    :param region: String region to create bucket in, e.g., 'us-west-2'
+    :param acl: Canned access control list to apply to the bucket. 'public-read'
+        makes sure everything posted is publicly readable
+    :return: True if bucket created, else False
+    """
+    
+    # Create bucket
+    try:
+        if region is None:
+            s3_client = boto3.client('s3')
+            s3_client.create_bucket(Bucket=bucket_name)
+        else:
+            s3_client = boto3.client('s3', region_name=region)
+            location = {'LocationConstraint': region}
+            s3_client.create_bucket(
+                Bucket=bucket_name,
+                CreateBucketConfiguration=location,
+                ACL=acl
+            )
+    except ClientError as e:
+        logging.error(e)
+        return False
+    return True
 
 
 def process_song_data(spark, input_data, output_data):
@@ -184,9 +216,13 @@ def process_log_data(spark, input_data, output_data):
 
 def main():
     spark = create_spark_session()
+    
+    # S3 bucket name to create and output tables to
+    output_bucket = "davidrubinger"
     input_data = "s3a://udacity-dend/"
     output_data = ""
     
+    create_bucket(output_bucket, region="us-west-2", acl="public-read")
     process_song_data(spark, input_data, output_data)
     process_log_data(spark, input_data, output_data)
 
