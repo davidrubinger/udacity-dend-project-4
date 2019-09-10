@@ -224,7 +224,7 @@ def main():
     spark = create_spark_session()
     
     # S3 bucket name to create and output tables to
-    output_bucket = "davidrubinger"
+    output_bucket = "udacity-dend-project-4-davidrubinger"
     input_data = "s3a://udacity-dend/"
     output_data = "s3a://" + output_bucket + "/"
     
