@@ -9,6 +9,7 @@ from pyspark.sql.types import (
 import logging
 import boto3
 from botocore.exceptions import ClientError
+import sys
 
 
 config = configparser.ConfigParser()
@@ -225,7 +226,7 @@ def main():
     spark = create_spark_session()
     
     # S3 bucket name to create and output tables to
-    output_bucket = "udacity-dend-project-4-davidrubinger"
+    output_bucket = sys.argv[1]
     input_data = "s3a://udacity-dend/"
     output_data = "s3a://" + output_bucket + "/"
     
