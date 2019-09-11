@@ -21,6 +21,8 @@ os.environ['AWS_DEFAULT_REGION']=config['AWS']['AWS_DEFAULT_REGION']
 
 
 def create_spark_session():
+    """Create a Spark session"""
+
     spark = SparkSession \
         .builder \
         .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:2.7.0") \
@@ -29,13 +31,14 @@ def create_spark_session():
 
 
 def create_bucket(bucket_name, region=None, acl="private"):
-    """Create an S3 bucket in a specified region
+    """
+    Create an S3 bucket in a specified region
     
-    :param bucket_name: Bucket to create
-    :param region: String region to create bucket in, e.g., 'us-west-2'
-    :param acl: Canned access control list to apply to the bucket. 'public-read'
-        makes sure everything posted is publicly readable
-    :return: True if bucket created, else False
+    Args:
+        bucket_name: Bucket to create
+        region: String region to create bucket in, e.g., 'us-west-2'
+        acl: Canned access control list to apply to the bucket. 'public-read'
+            makes sure everything posted is publicly readable
     """
     
     # Create bucket
@@ -58,6 +61,20 @@ def create_bucket(bucket_name, region=None, acl="private"):
 
 
 def process_song_data(spark, input_data, output_data):
+    """
+    Transform raw song data from S3 into analytics tables on S3
+
+    This function reads in song data in JSON format from S3; defines the schema
+    of songs and artists analytics tables; processes the raw data into
+    those tables; and then writes the tables into partitioned parquet files on
+    S3.
+
+    Args:
+        spark: a Spark session
+        input_data: an S3 bucket to read song data in from
+        output_data: an S3 bucket to write analytics tables to
+    """
+    
     # get filepath to song data file
     song_data = input_data + "song_data/*/*/*/*.json"
     
@@ -104,6 +121,20 @@ def process_song_data(spark, input_data, output_data):
 
 
 def process_log_data(spark, input_data, output_data):
+    """
+    Transform raw log data from S3 into analytics tables on S3
+
+    This function reads in log data in JSON format from S3; defines the schema
+    of songplays, users, and time analytics tables; processes the raw data into
+    those tables; and then writes the tables into partitioned parquet files on
+    S3.
+
+    Args:
+        spark: a Spark session
+        input_data: an S3 bucket to read log data in from
+        output_data: an S3 bucket to write analytics tables to
+    """
+
     # get filepath to log data file
     log_data = input_data + "log_data/*/*/*.json"
 
@@ -223,6 +254,8 @@ def process_log_data(spark, input_data, output_data):
 
 
 def main():
+    """Run ETL pipeline"""
+    
     spark = create_spark_session()
     
     # S3 bucket name to create and output tables to
