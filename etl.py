@@ -16,6 +16,7 @@ config.read('dl.cfg')
 
 os.environ['AWS_ACCESS_KEY_ID']=config['AWS']['AWS_ACCESS_KEY_ID']
 os.environ['AWS_SECRET_ACCESS_KEY']=config['AWS']['AWS_SECRET_ACCESS_KEY']
+os.environ['AWS_DEFAULT_REGION']=config['AWS']['AWS_DEFAULT_REGION']
 
 
 def create_spark_session():
@@ -228,7 +229,11 @@ def main():
     input_data = "s3a://udacity-dend/"
     output_data = "s3a://" + output_bucket + "/"
     
-    create_bucket(output_bucket, region="us-west-2", acl="public-read")
+    create_bucket(
+        output_bucket,
+        region=os.environ['AWS_DEFAULT_REGION'],
+        acl="public-read"
+    )
     process_song_data(spark, input_data, output_data)
     process_log_data(spark, input_data, output_data)
 
