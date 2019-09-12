@@ -222,10 +222,16 @@ def process_log_data(spark, input_data, output_data):
     songs = (
         song_df
         .join(artists_table, "artist_id", "full")
-        .select("song_id", "title", "artist_id", "name")
+        .select("song_id", "title", "artist_id", "name", "duration")
     )
     songplays_table = df.join(
-        songs, [df.song == songs.title, df.artist == songs.name], "left"
+        songs,
+        [
+            df.song == songs.title,
+            df.artist == songs.name,
+            df.length == songs.duration
+        ],
+        "left"
     )
     songplays_table = (
         songplays_table
